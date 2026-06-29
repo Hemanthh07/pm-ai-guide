@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PM + AI Guide</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PM+AI">
+  <meta name="theme-color" content="#7C6EF8">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Header ── -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-mark">⚡</div>
+        <span class="logo-label">PM<em>+</em>AI</span>
+      </div>
+      <div class="header-right">
+        <div class="streak-pill" id="streak-pill">🔥 0</div>
+        <button class="icon-btn" onclick="openSettings()" aria-label="Settings">⚙</button>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="progress-meta" id="progress-meta">0 / 0 tasks complete</div>
+  </header>
+
+  <!-- ── Week strip ── -->
+  <nav class="week-strip" id="week-strip"></nav>
+
+  <!-- ── Main ── -->
+  <main class="main" id="main">
+    <div id="today-banner"></div>
+    <div id="day-list"></div>
+  </main>
+
+  <!-- ── Bottom bar ── -->
+  <nav class="bottom-bar">
+    <button class="tab-btn active" id="tab-plan" onclick="switchTab('plan')">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">Plan</span>
+    </button>
+    <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">
+      <span class="tab-icon">📊</span>
+      <span class="tab-label">Progress</span>
+    </button>
+    <button class="tab-btn" id="tab-notes" onclick="switchTab('notes')">
+      <span class="tab-icon">📝</span>
+      <span class="tab-label">Notes</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ── Stats panel ── -->
+<div class="panel" id="panel-stats">
+  <div class="panel-header">
+    <span class="panel-title">Progress</span>
+    <button class="close-btn" onclick="closePanel('panel-stats')">✕</button>
+  </div>
+  <div class="panel-body" id="stats-body"></div>
+</div>
+
+<!-- ── Notes panel ── -->
+<div class="panel" id="panel-notes">
+  <div class="panel-header">
+    <span class="panel-title">All Notes</span>
+    <button class="close-btn" onclick="closePanel('panel-notes')">✕</button>
+  </div>
+  <div class="panel-body" id="notes-body"></div>
+</div>
+
+<!-- ── Settings panel ── -->
+<div class="panel" id="panel-settings">
+  <div class="panel-header">
+    <span class="panel-title">Settings & GitHub Sync</span>
+    <button class="close-btn" onclick="closePanel('panel-settings')">✕</button>
+  </div>
+  <div class="panel-body">
+
+    <div class="settings-section">
+      <div class="settings-label">GitHub Sync</div>
+      <div class="settings-desc">Connect your GitHub repo to push progress and pull plan updates directly from the app. Your progress is saved as <code>progress.json</code> in your repo.</div>
+
+      <div class="field-group">
+        <label class="field-label">GitHub Personal Access Token</label>
+        <input class="field-input" id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+          oninput="ghFieldChange()">
+        <div class="field-hint">Generate at github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens. Needs <strong>Contents: Read & Write</strong> permission on your repo.</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Repository (username/repo-name)</label>
+        <input class="field-input" id="gh-repo" type="text" placeholder="hemanth/pm-ai-guide"
+          oninput="ghFieldChange()">
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Branch</label>
+        <input class="field-input" id="gh-branch" type="text" placeholder="main" value="main"
+          oninput="ghFieldChange()">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-push" onclick="ghPush()" disabled>⬆ Push progress</button>
+        <button class="btn-secondary" id="btn-pull" onclick="ghPull()" disabled>⬇ Pull updates</button>
+      </div>
+      <div class="sync-status" id="sync-status"></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-label">Start date</div>
+      <div class="settings-desc">Day 1 of your journey. Used to show how long you've been running.</div>
+      <input class="field-input" id="start-date-input" type="date" onchange="updateStartDate(this.value)">
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-label">Data</div>
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="exportData()">⬇ Export JSON</button>
+        <button class="btn-danger" onclick="confirmReset()">🗑 Reset all progress</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-label">Install on iPad</div>
+      <div class="settings-desc">
+        Open this page in <strong>Safari</strong> on your iPad →
+        tap the Share button (□↑) →
+        tap <strong>"Add to Home Screen"</strong> →
+        tap Add.<br><br>
+        The app will open full-screen with no browser chrome and work offline.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Overlay ── -->
+<div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script src="js/plan.js"></script>
+<script src="js/state.js"></script>
+<script src="js/github.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
